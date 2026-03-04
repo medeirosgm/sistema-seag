@@ -26,7 +26,7 @@ def verificar_senha():
         return False
     return True
 
-# --- FUNÇÃO DADOS INICIAIS (A Lista Real com 124 Entidades) ---
+# --- FUNÇÃO DADOS INICIAIS (Atualizada com a SulAmérica e coluna Contato) ---
 def criar_dados_iniciais():
     dados_consignatarias = [
         ("ASSIST. ODONTO E MEDICA - DENTALSAUDE", "08.775.214/0001-13"),
@@ -136,7 +136,7 @@ def criar_dados_iniciais():
         ("SEGURADORA E PREVIDÊNCIA - RSPREV", "26.421.353/0001-32"),
         ("SEGURADORA E PREVIDÊNCIA - SABEMI", "33.127.323/0001-05"),
         ("SEGURADORA E PREVIDÊNCIA - SABEMI SEGURADORA", "33.123.224/0001-38"),
-        ("SEGURADORA E PREVIDÊNCIA - SulAmérica Seguros de Pessoas e Previdência", "01.704.513/0001-46"),
+        ("SEGURADORA E PREVIDÊNCIA - SULAMÉRICA SEGUROS DE PESSOAS E PREVIDÊNCIA", "01.704.513/0001-46")
         ("SINDICATO - SINDOCENTES UEA", "18.333.774/0001-03"),
         ("SINDICATO - SINDEPOL", "14.312.754/0001-26"),
         ("SINDICATO - SINDEIPOL", "23.334.323/0001-29"),
@@ -153,21 +153,23 @@ def criar_dados_iniciais():
         ("SINDICATO - SINTEAM", "04.533.666/0001-41"),
         ("SINDICATO - SINTRAQUA", "05.333.666/0001-51"),
         ("SINDICATO - SISPEAM", "03.355.321/0001-35"),
-        ("VEMCARD PARTICIPACOES S.A", "44.133.733/0001-03")
+        ("VEMCARD PARTICIPACOES S.A", "44.133.733/0001-03"),
     ]
+    qtd = len(dados_consignatarias)
     return pd.DataFrame({
-        'ID': range(1, len(dados_consignatarias) + 1),
-        'N° SIGED': ['' for _ in dados_consignatarias],
+        'ID': range(1, qtd + 1),
+        'N° SIGED': [''] * qtd,
         'Entidade': [d[0] for d in dados_consignatarias],
         'CNPJ': [d[1] for d in dados_consignatarias],
-        'Status': ['Aguardando Doc' for _ in dados_consignatarias],
-        'Parecer': ['' for _ in dados_consignatarias],
-        'Diligencia': ['Não' for _ in dados_consignatarias],
-        'Encaminhado ao CTA': ['Não' for _ in dados_consignatarias],
-        'Enviado a Consigfácil': ['Não' for _ in dados_consignatarias],
-        'Data Limite': ['30/04/2026' for _ in dados_consignatarias],
-        'Data de Finalização': ['' for _ in dados_consignatarias],
-        'Observação': ['' for _ in dados_consignatarias]
+        'Status': ['Aguardando Doc'] * qtd,
+        'Parecer': [''] * qtd,
+        'Diligencia': ['Não'] * qtd,
+        'Encaminhado ao CTA': ['Não'] * qtd,
+        'Enviado a Consigfácil': ['Não'] * qtd,
+        'Data Limite': ['30/04/2026'] * qtd,
+        'Data de Finalização': [''] * qtd,
+        'Observação': [''] * qtd,
+        'Contato': [''] * qtd
     })
 
 # --- INÍCIO DO SISTEMA PÓS-LOGIN ---
@@ -178,15 +180,47 @@ if verificar_senha():
     conn = st.connection("gsheets", type=GSheetsConnection)
 
     try:
-        # Lê os dados já usando a autenticação poderosa das Secrets
         df = conn.read(ttl=0)
         
-        # Se a planilha na nuvem estiver vazia, ele sobe a lista de 124 entidades
+        # Inteligência de Auto-Atualização
         if df.empty or len(df.columns) < 2:
             df = criar_dados_iniciais()
             conn.update(data=df)
-            st.info("Planilha inicializada automaticamente com as 124 entidades!")
+            st.info("Planilha inicializada automaticamente com as entidades!")
+        else:
+            atualizou_planilha = False
             
+            # Adiciona a coluna 'Contato' se ela não existir na nuvem
+            if 'Contato' not in df.columns:
+                df['Contato'] = ''
+                atualizou_planilha = True
+                
+            # Verifica e adiciona a SulAmérica se ela não estiver na nuvem
+            if not df['CNPJ'].astype(str).str.contains('01.704.513/0001-46').any():
+                novo_id = int(df['ID'].max()) + 1 if pd.notna(df['ID'].max()) else len(df) + 1
+                nova_linha = pd.DataFrame([{
+                    'ID': novo_id,
+                    'N° SIGED': '',
+                    'Entidade': 'SEGURADORA E PREVIDÊNCIA - SULAMÉRICA SEGUROS DE PESSOAS E PREVIDÊNCIA',
+                    'CNPJ': '01.704.513/0001-46',
+                    'Status': 'Aguardando Doc',
+                    'Parecer': '',
+                    'Diligencia': 'Não',
+                    'Encaminhado ao CTA': 'Não',
+                    'Enviado a Consigfácil': 'Não',
+                    'Data Limite': '30/04/2026',
+                    'Data de Finalização': '',
+                    'Observação': '',
+                    'Contato': ''
+                }])
+                df = pd.concat([df, nova_linha], ignore_index=True)
+                atualizou_planilha = True
+                
+            # Salva as injeções automáticas no Google Sheets
+            if atualizou_planilha:
+                conn.update(data=df)
+                st.info("✅ Sistema auto-atualizado com a coluna 'Contato' e a seguradora SulAmérica!")
+
         df = df.fillna('')
         st.success("✅ Conectado à Planilha Oficial via Conta de Serviço!")
     except Exception as e:
@@ -249,16 +283,15 @@ if verificar_senha():
             "Diligencia": st.column_config.SelectboxColumn(options=["Não", "Sim"]),
             "Encaminhado ao CTA": st.column_config.SelectboxColumn(options=["Não", "Sim"]),
             "Enviado a Consigfácil": st.column_config.SelectboxColumn(options=["Não", "Sim"]),
-            "Data de Finalização": st.column_config.TextColumn(disabled=True)
+            "Data de Finalização": st.column_config.TextColumn(disabled=True),
+            "Contato": st.column_config.TextColumn("Contato") # Torna a nova coluna editável!
         }
     )
 
     if st.button("💾 Salvar Alterações na Nuvem"):
-        # Aplica edições ao DF principal
         for idx, row in df_editado.iterrows():
             df.loc[df['ID'] == row['ID']] = row
         
-        # Regra de Data de Finalização
         for i, r in df.iterrows():
             if str(r['Status']).strip() == 'Finalizada' and not str(r['Data de Finalização']).strip():
                 df.at[i, 'Data de Finalização'] = datetime.now().strftime('%d/%m/%Y')
@@ -266,7 +299,6 @@ if verificar_senha():
                 df.at[i, 'Data de Finalização'] = ''
 
         try:
-            # Comando mágico de escrita no Google Sheets
             conn.update(data=df)
             st.success("✅ O Robô atualizou o Google Sheets com sucesso!")
             st.rerun()
@@ -277,5 +309,5 @@ if verificar_senha():
     st.divider()
     col1, col2 = st.columns(2)
     with col1: st.plotly_chart(px.pie(df, names='Status', title='Progresso de Recadastramento', hole=0.3), use_container_width=True)
-
     with col2: st.plotly_chart(px.bar(df['Status'].value_counts(), title='Total por Status'), use_container_width=True)
+
