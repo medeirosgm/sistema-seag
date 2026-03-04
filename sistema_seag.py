@@ -136,6 +136,7 @@ def criar_dados_iniciais():
         ("SEGURADORA E PREVIDÊNCIA - RSPREV", "26.421.353/0001-32"),
         ("SEGURADORA E PREVIDÊNCIA - SABEMI", "33.127.323/0001-05"),
         ("SEGURADORA E PREVIDÊNCIA - SABEMI SEGURADORA", "33.123.224/0001-38"),
+        ("SEGURADORA E PREVIDÊNCIA - SulAmérica Seguros de Pessoas e Previdência", "01.704.513/0001-46"),
         ("SINDICATO - SINDOCENTES UEA", "18.333.774/0001-03"),
         ("SINDICATO - SINDEPOL", "14.312.754/0001-26"),
         ("SINDICATO - SINDEIPOL", "23.334.323/0001-29"),
@@ -276,4 +277,5 @@ if verificar_senha():
     st.divider()
     col1, col2 = st.columns(2)
     with col1: st.plotly_chart(px.pie(df, names='Status', title='Progresso de Recadastramento', hole=0.3), use_container_width=True)
+
     with col2: st.plotly_chart(px.bar(df['Status'].value_counts(), title='Total por Status'), use_container_width=True)
