@@ -8,6 +8,9 @@ from datetime import datetime
 # Configuração da Página SEAG
 st.set_page_config(page_title="Gestão SEAG 2026", layout="wide")
 
+# URL DIRETA DA PLANILHA
+URL_PLANILHA = "https://docs.google.com/spreadsheets/d/12nBlopOzq1LY1CDObfaNfWPU0xxa9-P-_e1IJtDgLB4/edit?gid=0#gid=0"
+
 # --- SISTEMA DE LOGIN ---
 def verificar_senha():
     if "autenticado" not in st.session_state:
@@ -26,7 +29,7 @@ def verificar_senha():
         return False
     return True
 
-# --- FUNÇÃO DADOS INICIAIS (Atualizada com a SulAmérica e coluna Contato) ---
+# --- FUNÇÃO DADOS INICIAIS (Com a SulAmérica e coluna Contato) ---
 def criar_dados_iniciais():
     dados_consignatarias = [
         ("ASSIST. ODONTO E MEDICA - DENTALSAUDE", "08.775.214/0001-13"),
@@ -136,7 +139,6 @@ def criar_dados_iniciais():
         ("SEGURADORA E PREVIDÊNCIA - RSPREV", "26.421.353/0001-32"),
         ("SEGURADORA E PREVIDÊNCIA - SABEMI", "33.127.323/0001-05"),
         ("SEGURADORA E PREVIDÊNCIA - SABEMI SEGURADORA", "33.123.224/0001-38"),
-        ("SEGURADORA E PREVIDÊNCIA - SULAMÉRICA SEGUROS DE PESSOAS E PREVIDÊNCIA", "01.704.513/0001-46")
         ("SINDICATO - SINDOCENTES UEA", "18.333.774/0001-03"),
         ("SINDICATO - SINDEPOL", "14.312.754/0001-26"),
         ("SINDICATO - SINDEIPOL", "23.334.323/0001-29"),
@@ -154,6 +156,7 @@ def criar_dados_iniciais():
         ("SINDICATO - SINTRAQUA", "05.333.666/0001-51"),
         ("SINDICATO - SISPEAM", "03.355.321/0001-35"),
         ("VEMCARD PARTICIPACOES S.A", "44.133.733/0001-03"),
+        ("SEGURADORA E PREVIDÊNCIA - SULAMÉRICA SEGUROS DE PESSOAS E PREVIDÊNCIA", "01.704.513/0001-46")
     ]
     qtd = len(dados_consignatarias)
     return pd.DataFrame({
@@ -190,44 +193,64 @@ if verificar_senha():
         else:
             atualizou_planilha = False
             
-            # Adiciona a coluna 'Contato' se ela não existir na nuvem
+            # Adiciona a coluna 'Contato'
             if 'Contato' not in df.columns:
                 df['Contato'] = ''
                 atualizou_planilha = True
                 
-            # Verifica e adiciona a SulAmérica se ela não estiver na nuvem
+            # Verifica e adiciona a SulAmérica
             if not df['CNPJ'].astype(str).str.contains('01.704.513/0001-46').any():
                 novo_id = int(df['ID'].max()) + 1 if pd.notna(df['ID'].max()) else len(df) + 1
                 nova_linha = pd.DataFrame([{
-                    'ID': novo_id,
-                    'N° SIGED': '',
-                    'Entidade': 'SEGURADORA E PREVIDÊNCIA - SULAMÉRICA SEGUROS DE PESSOAS E PREVIDÊNCIA',
-                    'CNPJ': '01.704.513/0001-46',
-                    'Status': 'Aguardando Doc',
-                    'Parecer': '',
-                    'Diligencia': 'Não',
-                    'Encaminhado ao CTA': 'Não',
-                    'Enviado a Consigfácil': 'Não',
-                    'Data Limite': '30/04/2026',
-                    'Data de Finalização': '',
-                    'Observação': '',
-                    'Contato': ''
+                    'ID': novo_id, 'N° SIGED': '', 'Entidade': 'SEGURADORA E PREVIDÊNCIA - SULAMÉRICA SEGUROS DE PESSOAS E PREVIDÊNCIA',
+                    'CNPJ': '01.704.513/0001-46', 'Status': 'Aguardando Doc', 'Parecer': '', 'Diligencia': 'Não',
+                    'Encaminhado ao CTA': 'Não', 'Enviado a Consigfácil': 'Não', 'Data Limite': '30/04/2026',
+                    'Data de Finalização': '', 'Observação': '', 'Contato': ''
                 }])
                 df = pd.concat([df, nova_linha], ignore_index=True)
                 atualizou_planilha = True
                 
-            # Salva as injeções automáticas no Google Sheets
             if atualizou_planilha:
                 conn.update(data=df)
-                st.info("✅ Sistema auto-atualizado com a coluna 'Contato' e a seguradora SulAmérica!")
 
         df = df.fillna('')
-        st.success("✅ Conectado à Planilha Oficial via Conta de Serviço!")
     except Exception as e:
         df = criar_dados_iniciais()
-        st.error(f"⚠️ Erro de Conexão: Verifique as Secrets. Detalhe: {e}")
+        st.error(f"⚠️ Erro de Conexão: {e}")
 
-    # --- RELATÓRIO PDF ---
+    # Lista total de números disponíveis (1 a 500)
+    numeros_totais = [str(i) for i in range(1, 501)]
+    opcoes_tabela_parecer = [""] + numeros_totais
+    opcoes_tabela_diligencia = ["Não", "Sim"] + numeros_totais
+
+    # --- NOVO: GERADOR DE NUMERAÇÃO ÚNICA (O QUE SÓ MOSTRA NÚMEROS LIVRES) ---
+    st.write("### 🔢 Gerador de Numeração Única")
+    with st.expander("Clique aqui para puxar um número livre de Parecer ou Diligência", expanded=False):
+        c1, c2, c3, c4 = st.columns([3, 2, 2, 2])
+        
+        entidade_alvo = c1.selectbox("1. Entidade:", [""] + df['Entidade'].tolist())
+        tipo_documento = c2.selectbox("2. Documento:", ["Parecer", "Diligencia"])
+        
+        # Lógica central: exclui da lista tudo o que já foi usado no Google Sheets
+        usados = df[tipo_documento].astype(str).str.strip().tolist()
+        livres = [n for n in numeros_totais if n not in usados]
+        
+        num_escolhido = c3.selectbox("3. Números Livres:", [""] + livres)
+        
+        if c4.button("✅ Atribuir Número"):
+            if entidade_alvo and num_escolhido:
+                idx = df.index[df['Entidade'] == entidade_alvo].tolist()[0]
+                df.at[idx, tipo_documento] = num_escolhido
+                try:
+                    conn.update(data=df)
+                    st.success(f"{tipo_documento} número {num_escolhido} registrado com sucesso!")
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"Erro ao salvar no Google Sheets: {e}")
+            else:
+                st.warning("Preencha todos os campos primeiro.")
+
+    # --- SIDEBAR E RELATÓRIOS ---
     def gerar_pdf_custom(dataframe, filtro_coluna, filtro_valor, titulo_relatorio):
         pdf = FPDF()
         pdf.add_page()
@@ -258,13 +281,11 @@ if verificar_senha():
             pdf.cell(35, 7, info_final, 1, 1, 'C')
         return pdf.output(dest='S').encode('latin-1')
 
-    # --- SIDEBAR E RELATÓRIOS ---
     st.sidebar.header("📁 Central de Relatórios")
     opcoes = [
         ("Pendentes", "Status", "Aguardando Doc"),
         ("Finalizadas", "Status", "Finalizada"),
-        ("No CTA", "Encaminhado ao CTA", "Sim"),
-        ("Diligências", "Diligencia", "Sim")
+        ("No CTA", "Encaminhado ao CTA", "Sim")
     ]
     for nome, col, val in opcoes:
         if st.sidebar.button(f"📄 PDF: {nome}"):
@@ -272,6 +293,7 @@ if verificar_senha():
             st.sidebar.download_button(f"⬇️ Baixar {nome}", pdf_out, f"SEAG_{nome}.pdf")
 
     # --- PAINEL DE EDIÇÃO (COM CRUD ATIVADO) ---
+    st.write("### 📝 Painel de Controle Online")
     busca = st.text_input("🔍 Buscar Entidade ou CNPJ:", "")
     mask = df['Entidade'].astype(str).str.contains(busca, case=False) | df['CNPJ'].astype(str).str.contains(str(busca))
     df_filtrado = df[mask].copy()
@@ -280,26 +302,43 @@ if verificar_senha():
         df_filtrado, use_container_width=True, hide_index=True,
         column_config={
             "Status": st.column_config.SelectboxColumn(options=["Aguardando Doc", "Finalizada"]),
-            "Diligencia": st.column_config.SelectboxColumn(options=["Não", "Sim"]),
+            "Parecer": st.column_config.SelectboxColumn("Parecer", options=opcoes_tabela_parecer),
+            "Diligencia": st.column_config.SelectboxColumn("Diligência", options=opcoes_tabela_diligencia),
             "Encaminhado ao CTA": st.column_config.SelectboxColumn(options=["Não", "Sim"]),
             "Enviado a Consigfácil": st.column_config.SelectboxColumn(options=["Não", "Sim"]),
             "Data de Finalização": st.column_config.TextColumn(disabled=True),
-            "Contato": st.column_config.TextColumn("Contato") # Torna a nova coluna editável!
+            "Contato": st.column_config.TextColumn("Contato")
         }
     )
 
     if st.button("💾 Salvar Alterações na Nuvem"):
+        df_verificacao = df.copy()
         for idx, row in df_editado.iterrows():
-            df.loc[df['ID'] == row['ID']] = row
+            df_verificacao.loc[df_verificacao['ID'] == row['ID']] = row
+            
+        # --- TRAVA ANTI-DUPLICAÇÃO DE PARECER E DILIGÊNCIA ---
+        # Impede de salvar se a pessoa tentou digitar um número usado diretamente na tabela
+        pareceres_ativos = df_verificacao['Parecer'].replace('', pd.NA).dropna()
+        if pareceres_ativos.duplicated().any():
+            duplicados = pareceres_ativos[pareceres_ativos.duplicated()].unique()
+            st.error(f"❌ Erro de Numeração: O Parecer número {', '.join(duplicados)} já foi utilizado em outra entidade! Altere antes de salvar.")
+            st.stop()
+            
+        diligencias_ativas = df_verificacao['Diligencia'].replace(['', 'Não', 'Sim'], pd.NA).dropna()
+        if diligencias_ativas.duplicated().any():
+            dups = diligencias_ativas[diligencias_ativas.duplicated()].unique()
+            st.error(f"❌ Erro de Numeração: A Diligência número {', '.join(dups)} já foi utilizada em outra entidade! Altere antes de salvar.")
+            st.stop()
         
-        for i, r in df.iterrows():
+        # Regra de Data de Finalização
+        for i, r in df_verificacao.iterrows():
             if str(r['Status']).strip() == 'Finalizada' and not str(r['Data de Finalização']).strip():
-                df.at[i, 'Data de Finalização'] = datetime.now().strftime('%d/%m/%Y')
+                df_verificacao.at[i, 'Data de Finalização'] = datetime.now().strftime('%d/%m/%Y')
             elif str(r['Status']).strip() == 'Aguardando Doc':
-                df.at[i, 'Data de Finalização'] = ''
+                df_verificacao.at[i, 'Data de Finalização'] = ''
 
         try:
-            conn.update(data=df)
+            conn.update(data=df_verificacao)
             st.success("✅ O Robô atualizou o Google Sheets com sucesso!")
             st.rerun()
         except Exception as e:
@@ -310,4 +349,3 @@ if verificar_senha():
     col1, col2 = st.columns(2)
     with col1: st.plotly_chart(px.pie(df, names='Status', title='Progresso de Recadastramento', hole=0.3), use_container_width=True)
     with col2: st.plotly_chart(px.bar(df['Status'].value_counts(), title='Total por Status'), use_container_width=True)
-
