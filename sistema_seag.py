@@ -204,7 +204,7 @@ if verificar_senha():
                 nova_linha = pd.DataFrame([{
                     'ID': novo_id, 'N° SIGED': '', 'Entidade': 'SEGURADORA E PREVIDÊNCIA - SULAMÉRICA SEGUROS DE PESSOAS E PREVIDÊNCIA',
                     'CNPJ': '01.704.513/0001-46', 'Status': 'Aguardando Doc', 'Parecer': '', 'Diligencia': 'Não',
-                    'Encaminhado ao CTA': 'Não', 'Enviado a Consigfácil': 'Não', 'Data Limite': '30/04/2026',
+                    'Encaminhado ao CTA': 'Não', 'Enviado a Consigfácil': 'Não', 'Data Limite': '03/04/2026',
                     'Data de Finalização': '', 'Observação': '', 'Contato': ''
                 }])
                 df = pd.concat([df, nova_linha], ignore_index=True)
@@ -349,3 +349,4 @@ if verificar_senha():
     col1, col2 = st.columns(2)
     with col1: st.plotly_chart(px.pie(df, names='Status', title='Progresso de Recadastramento', hole=0.3), use_container_width=True)
     with col2: st.plotly_chart(px.bar(df['Status'].value_counts(), title='Total por Status'), use_container_width=True)
+
