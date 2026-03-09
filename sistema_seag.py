@@ -170,7 +170,7 @@ def criar_dados_iniciais():
         'Encaminhado ao CTA': ['Não'] * qtd,
         'Enviado a Consigfácil': ['Não'] * qtd,
         'Data Limite': ['29/03/2026'] * qtd, 
-        'Data de Finalização': [''] * qtd,
+        'Data de Recebimento Doc.': [''] * qtd,
         'Observação': [''] * qtd,
         'Contato': [''] * qtd
     })
@@ -193,31 +193,38 @@ if verificar_senha():
         else:
             atualizou_planilha = False
             
-            # Adiciona a coluna 'Contato'
+            # --- MIGRAÇÃO AUTOMÁTICA DE NOMES ANTIGOS ---
+            if 'Data de Finalização' in df.columns:
+                df = df.rename(columns={'Data de Finalização': 'Data de Recebimento Doc.'})
+                atualizou_planilha = True
+                
+            if 'Status' in df.columns and (df['Status'] == 'Finalizada').any():
+                df['Status'] = df['Status'].replace('Finalizada', 'Doc. Recebido')
+                atualizou_planilha = True
+            # --------------------------------------------
+
             if 'Contato' not in df.columns:
                 df['Contato'] = ''
                 atualizou_planilha = True
                 
-            # Verifica e adiciona a SulAmérica
             if not df['CNPJ'].astype(str).str.contains('01.704.513/0001-46').any():
                 novo_id = int(df['ID'].max()) + 1 if pd.notna(df['ID'].max()) else len(df) + 1
                 nova_linha = pd.DataFrame([{
                     'ID': novo_id, 'N° SIGED': '', 'Entidade': 'SEGURADORA E PREVIDÊNCIA - SULAMÉRICA SEGUROS DE PESSOAS E PREVIDÊNCIA',
                     'CNPJ': '01.704.513/0001-46', 'Status': 'Aguardando Doc', 'Parecer': '', 'Diligencia': 'Não',
                     'Encaminhado ao CTA': 'Não', 'Enviado a Consigfácil': 'Não', 'Data Limite': '29/03/2026', 
-                    'Data de Finalização': '', 'Observação': '', 'Contato': ''
+                    'Data de Recebimento Doc.': '', 'Observação': '', 'Contato': ''
                 }])
                 df = pd.concat([df, nova_linha], ignore_index=True)
                 atualizou_planilha = True
 
-            # Força a atualização da Data Limite de todos para a nova data
             if 'Data Limite' in df.columns and (df['Data Limite'] != '29/03/2026').any():
                 df['Data Limite'] = '29/03/2026'
                 atualizou_planilha = True
                 
             if atualizou_planilha:
                 conn.update(data=df)
-                st.info("✅ O sistema atualizou automaticamente os dados em falta e a nova Data Limite na nuvem!")
+                st.info("✅ O sistema migrou e atualizou automaticamente os dados na nuvem!")
 
         df = df.fillna('')
     except Exception as e:
@@ -237,7 +244,6 @@ if verificar_senha():
         entidade_alvo = c1.selectbox("1. Entidade:", [""] + df['Entidade'].tolist())
         tipo_documento = c2.selectbox("2. Documento:", ["Parecer", "Diligencia"])
         
-        # Lógica central: exclui da lista tudo o que já foi usado no Google Sheets
         usados = df[tipo_documento].astype(str).str.strip().tolist()
         livres = [n for n in numeros_totais if n not in usados]
         
@@ -280,7 +286,7 @@ if verificar_senha():
         
         pdf.set_font("Arial", size=8)
         for _, row in dados_f.iterrows():
-            info_final = str(row['Data de Finalização']) if filtro_valor == 'Finalizada' else str(row['N° SIGED'])
+            info_final = str(row['Data de Recebimento Doc.']) if filtro_valor == 'Doc. Recebido' else str(row['N° SIGED'])
             pdf.cell(10, 7, str(row['ID']), 1, 0, 'C')
             pdf.cell(100, 7, str(row['Entidade'])[:55], 1)
             pdf.cell(45, 7, str(row['CNPJ']), 1, 0, 'C')
@@ -291,7 +297,7 @@ if verificar_senha():
     
     opcoes = [
         ("Pendentes", "Status", "Aguardando Doc"),
-        ("Finalizadas", "Status", "Finalizada"),
+        ("Parecer SEAG", "Status", "Doc. Recebido"),
         ("No CTA", "Encaminhado ao CTA", "Sim"),
         ("Consigfácil", "Enviado a Consigfácil", "Sim") 
     ]
@@ -310,12 +316,12 @@ if verificar_senha():
     df_editado = st.data_editor(
         df_filtrado, use_container_width=True, hide_index=True,
         column_config={
-            "Status": st.column_config.SelectboxColumn(options=["Aguardando Doc", "Finalizada"]),
+            "Status": st.column_config.SelectboxColumn(options=["Aguardando Doc", "Doc. Recebido"]),
             "Parecer": st.column_config.SelectboxColumn("Parecer", options=opcoes_tabela_parecer),
             "Diligencia": st.column_config.SelectboxColumn("Diligência", options=opcoes_tabela_diligencia),
             "Encaminhado ao CTA": st.column_config.SelectboxColumn(options=["Não", "Sim"]),
             "Enviado a Consigfácil": st.column_config.SelectboxColumn(options=["Não", "Sim"]),
-            "Data de Finalização": st.column_config.TextColumn(disabled=True),
+            "Data de Recebimento Doc.": st.column_config.TextColumn(disabled=True),
             "Contato": st.column_config.TextColumn("Contato")
         }
     )
@@ -343,12 +349,12 @@ if verificar_senha():
             st.error(f"❌ Erro de Numeração: A Diligência número {', '.join(dups)} já foi utilizada em outra entidade! Altere antes de salvar.")
             st.stop()
         
-        # Regra de Data de Finalização
+        # Regra de Data de Recebimento
         for i, r in df_verificacao.iterrows():
-            if str(r['Status']).strip() == 'Finalizada' and not str(r['Data de Finalização']).strip():
-                df_verificacao.at[i, 'Data de Finalização'] = datetime.now().strftime('%d/%m/%Y')
+            if str(r['Status']).strip() == 'Doc. Recebido' and not str(r['Data de Recebimento Doc.']).strip():
+                df_verificacao.at[i, 'Data de Recebimento Doc.'] = datetime.now().strftime('%d/%m/%Y')
             elif str(r['Status']).strip() == 'Aguardando Doc':
-                df_verificacao.at[i, 'Data de Finalização'] = ''
+                df_verificacao.at[i, 'Data de Recebimento Doc.'] = ''
 
         try:
             conn.update(data=df_verificacao)
@@ -362,3 +368,4 @@ if verificar_senha():
     col1, col2 = st.columns(2)
     with col1: st.plotly_chart(px.pie(df, names='Status', title='Progresso de Recadastramento', hole=0.3), use_container_width=True)
     with col2: st.plotly_chart(px.bar(df['Status'].value_counts(), title='Total por Status'), use_container_width=True)
+
