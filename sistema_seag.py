@@ -18,7 +18,7 @@ def verificar_senha():
 
     if not st.session_state["autenticado"]:
         st.markdown("<h2 style='text-align: center;'>🔐 Acesso Restrito - SEAG</h2>", unsafe_allow_html=True)
-        senha_digitada = st.text_input("Digite a senha para aceder ao painel:", type="password")
+        senha_digitada = st.text_input("Digite a senha para acessar o painel:", type="password")
         
         if st.button("Entrar"):
             if senha_digitada == "seag@123":
@@ -189,7 +189,7 @@ if verificar_senha():
         if df.empty or len(df.columns) < 2:
             df = criar_dados_iniciais()
             conn.update(data=df)
-            st.info("Folha de cálculo inicializada automaticamente com as entidades!")
+            st.info("Planilha inicializada automaticamente com as entidades!")
         else:
             atualizou_planilha = False
             
@@ -222,7 +222,7 @@ if verificar_senha():
         df = df.fillna('')
     except Exception as e:
         df = criar_dados_iniciais()
-        st.error(f"⚠️ Erro de Ligação: {e}")
+        st.error(f"⚠️ Erro de Conexão: {e}")
 
     # Lista total de números disponíveis (1 a 500)
     numeros_totais = [str(i) for i in range(1, 501)]
@@ -249,10 +249,10 @@ if verificar_senha():
                 df.at[idx, tipo_documento] = num_escolhido
                 try:
                     conn.update(data=df)
-                    st.success(f"{tipo_documento} número {num_escolhido} registado com sucesso!")
+                    st.success(f"{tipo_documento} número {num_escolhido} registrado com sucesso!")
                     st.rerun()
                 except Exception as e:
-                    st.error(f"Erro ao guardar no Google Sheets: {e}")
+                    st.error(f"Erro ao salvar no Google Sheets: {e}")
             else:
                 st.warning("Preencha todos os campos primeiro.")
 
@@ -289,7 +289,6 @@ if verificar_senha():
 
     st.sidebar.header("📁 Central de Relatórios")
     
-    # --- NOVO: OPÇÃO CONSIGFÁCIL ADICIONADA AQUI ---
     opcoes = [
         ("Pendentes", "Status", "Aguardando Doc"),
         ("Finalizadas", "Status", "Finalizada"),
@@ -303,8 +302,8 @@ if verificar_senha():
             st.sidebar.download_button(f"⬇️ Baixar {nome}", pdf_out, f"SEAG_{nome}.pdf")
 
     # --- PAINEL DE EDIÇÃO (COM CRUD ATIVADO) ---
-    st.write("### 📝 Painel de Controlo Online")
-    busca = st.text_input("🔍 Procurar Entidade ou CNPJ:", "")
+    st.write("### 📝 Painel de Controle Online")
+    busca = st.text_input("🔍 Buscar Entidade ou CNPJ:", "")
     mask = df['Entidade'].astype(str).str.contains(busca, case=False) | df['CNPJ'].astype(str).str.contains(str(busca))
     df_filtrado = df[mask].copy()
 
@@ -321,7 +320,7 @@ if verificar_senha():
         }
     )
 
-if st.button("💾 Salvar Alterações na Nuvem"):
+    if st.button("💾 Salvar Alterações na Nuvem"):
         df_verificacao = df.copy()
         
         # --- SOLUÇÃO DO VALUE ERROR ---
@@ -335,13 +334,13 @@ if st.button("💾 Salvar Alterações na Nuvem"):
         pareceres_ativos = df_verificacao['Parecer'].replace('', pd.NA).dropna()
         if pareceres_ativos.duplicated().any():
             duplicados = pareceres_ativos[pareceres_ativos.duplicated()].unique()
-            st.error(f"❌ Erro de Numeração: O Parecer número {', '.join(duplicados)} já foi utilizado noutra entidade! Altere antes de guardar.")
+            st.error(f"❌ Erro de Numeração: O Parecer número {', '.join(duplicados)} já foi utilizado em outra entidade! Altere antes de salvar.")
             st.stop()
             
         diligencias_ativas = df_verificacao['Diligencia'].replace(['', 'Não', 'Sim'], pd.NA).dropna()
         if diligencias_ativas.duplicated().any():
             dups = diligencias_ativas[diligencias_ativas.duplicated()].unique()
-            st.error(f"❌ Erro de Numeração: A Diligência número {', '.join(dups)} já foi utilizada noutra entidade! Altere antes de guardar.")
+            st.error(f"❌ Erro de Numeração: A Diligência número {', '.join(dups)} já foi utilizada em outra entidade! Altere antes de salvar.")
             st.stop()
         
         # Regra de Data de Finalização
@@ -356,11 +355,10 @@ if st.button("💾 Salvar Alterações na Nuvem"):
             st.success("✅ O Robô atualizou o Google Sheets com sucesso!")
             st.rerun()
         except Exception as e:
-            st.error(f"❌ Erro ao guardar: {e}")
+            st.error(f"❌ Erro ao salvar: {e}")
 
     # --- GRÁFICOS ---
     st.divider()
     col1, col2 = st.columns(2)
     with col1: st.plotly_chart(px.pie(df, names='Status', title='Progresso de Recadastramento', hole=0.3), use_container_width=True)
     with col2: st.plotly_chart(px.bar(df['Status'].value_counts(), title='Total por Status'), use_container_width=True)
-
