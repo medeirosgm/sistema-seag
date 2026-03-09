@@ -18,7 +18,7 @@ def verificar_senha():
 
     if not st.session_state["autenticado"]:
         st.markdown("<h2 style='text-align: center;'>🔐 Acesso Restrito - SEAG</h2>", unsafe_allow_html=True)
-        senha_digitada = st.text_input("Digite a senha para acessar o painel:", type="password")
+        senha_digitada = st.text_input("Digite a senha para aceder ao painel:", type="password")
         
         if st.button("Entrar"):
             if senha_digitada == "seag@123":
@@ -29,7 +29,7 @@ def verificar_senha():
         return False
     return True
 
-# --- FUNÇÃO DADOS INICIAIS (Com a SulAmérica e coluna Contato) ---
+# --- FUNÇÃO DADOS INICIAIS ---
 def criar_dados_iniciais():
     dados_consignatarias = [
         ("ASSIST. ODONTO E MEDICA - DENTALSAUDE", "08.775.214/0001-13"),
@@ -169,7 +169,7 @@ def criar_dados_iniciais():
         'Diligencia': ['Não'] * qtd,
         'Encaminhado ao CTA': ['Não'] * qtd,
         'Enviado a Consigfácil': ['Não'] * qtd,
-        'Data Limite': ['30/04/2026'] * qtd,
+        'Data Limite': ['29/03/2026'] * qtd, # <-- Alterado aqui
         'Data de Finalização': [''] * qtd,
         'Observação': [''] * qtd,
         'Contato': [''] * qtd
@@ -189,7 +189,7 @@ if verificar_senha():
         if df.empty or len(df.columns) < 2:
             df = criar_dados_iniciais()
             conn.update(data=df)
-            st.info("Planilha inicializada automaticamente com as entidades!")
+            st.info("Folha de cálculo inicializada automaticamente com as entidades!")
         else:
             atualizou_planilha = False
             
@@ -204,26 +204,32 @@ if verificar_senha():
                 nova_linha = pd.DataFrame([{
                     'ID': novo_id, 'N° SIGED': '', 'Entidade': 'SEGURADORA E PREVIDÊNCIA - SULAMÉRICA SEGUROS DE PESSOAS E PREVIDÊNCIA',
                     'CNPJ': '01.704.513/0001-46', 'Status': 'Aguardando Doc', 'Parecer': '', 'Diligencia': 'Não',
-                    'Encaminhado ao CTA': 'Não', 'Enviado a Consigfácil': 'Não', 'Data Limite': '03/04/2026',
+                    'Encaminhado ao CTA': 'Não', 'Enviado a Consigfácil': 'Não', 'Data Limite': '29/03/2026', # <-- Alterado aqui
                     'Data de Finalização': '', 'Observação': '', 'Contato': ''
                 }])
                 df = pd.concat([df, nova_linha], ignore_index=True)
                 atualizou_planilha = True
+
+            # Força a atualização da Data Limite de todos para a nova data
+            if 'Data Limite' in df.columns and (df['Data Limite'] != '29/03/2026').any():
+                df['Data Limite'] = '29/03/2026'
+                atualizou_planilha = True
                 
             if atualizou_planilha:
                 conn.update(data=df)
+                st.info("✅ O sistema atualizou automaticamente os dados em falta e a nova Data Limite na nuvem!")
 
         df = df.fillna('')
     except Exception as e:
         df = criar_dados_iniciais()
-        st.error(f"⚠️ Erro de Conexão: {e}")
+        st.error(f"⚠️ Erro de Ligação: {e}")
 
     # Lista total de números disponíveis (1 a 500)
     numeros_totais = [str(i) for i in range(1, 501)]
     opcoes_tabela_parecer = [""] + numeros_totais
     opcoes_tabela_diligencia = ["Não", "Sim"] + numeros_totais
 
-    # --- NOVO: GERADOR DE NUMERAÇÃO ÚNICA (O QUE SÓ MOSTRA NÚMEROS LIVRES) ---
+    # --- GERADOR DE NUMERAÇÃO ÚNICA (O QUE SÓ MOSTRA NÚMEROS LIVRES) ---
     st.write("### 🔢 Gerador de Numeração Única")
     with st.expander("Clique aqui para puxar um número livre de Parecer ou Diligência", expanded=False):
         c1, c2, c3, c4 = st.columns([3, 2, 2, 2])
@@ -243,10 +249,10 @@ if verificar_senha():
                 df.at[idx, tipo_documento] = num_escolhido
                 try:
                     conn.update(data=df)
-                    st.success(f"{tipo_documento} número {num_escolhido} registrado com sucesso!")
+                    st.success(f"{tipo_documento} número {num_escolhido} registado com sucesso!")
                     st.rerun()
                 except Exception as e:
-                    st.error(f"Erro ao salvar no Google Sheets: {e}")
+                    st.error(f"Erro ao guardar no Google Sheets: {e}")
             else:
                 st.warning("Preencha todos os campos primeiro.")
 
@@ -293,8 +299,8 @@ if verificar_senha():
             st.sidebar.download_button(f"⬇️ Baixar {nome}", pdf_out, f"SEAG_{nome}.pdf")
 
     # --- PAINEL DE EDIÇÃO (COM CRUD ATIVADO) ---
-    st.write("### 📝 Painel de Controle Online")
-    busca = st.text_input("🔍 Buscar Entidade ou CNPJ:", "")
+    st.write("### 📝 Painel de Controlo Online")
+    busca = st.text_input("🔍 Procurar Entidade ou CNPJ:", "")
     mask = df['Entidade'].astype(str).str.contains(busca, case=False) | df['CNPJ'].astype(str).str.contains(str(busca))
     df_filtrado = df[mask].copy()
 
@@ -317,17 +323,16 @@ if verificar_senha():
             df_verificacao.loc[df_verificacao['ID'] == row['ID']] = row
             
         # --- TRAVA ANTI-DUPLICAÇÃO DE PARECER E DILIGÊNCIA ---
-        # Impede de salvar se a pessoa tentou digitar um número usado diretamente na tabela
         pareceres_ativos = df_verificacao['Parecer'].replace('', pd.NA).dropna()
         if pareceres_ativos.duplicated().any():
             duplicados = pareceres_ativos[pareceres_ativos.duplicated()].unique()
-            st.error(f"❌ Erro de Numeração: O Parecer número {', '.join(duplicados)} já foi utilizado em outra entidade! Altere antes de salvar.")
+            st.error(f"❌ Erro de Numeração: O Parecer número {', '.join(duplicados)} já foi utilizado noutra entidade! Altere antes de guardar.")
             st.stop()
             
         diligencias_ativas = df_verificacao['Diligencia'].replace(['', 'Não', 'Sim'], pd.NA).dropna()
         if diligencias_ativas.duplicated().any():
             dups = diligencias_ativas[diligencias_ativas.duplicated()].unique()
-            st.error(f"❌ Erro de Numeração: A Diligência número {', '.join(dups)} já foi utilizada em outra entidade! Altere antes de salvar.")
+            st.error(f"❌ Erro de Numeração: A Diligência número {', '.join(dups)} já foi utilizada noutra entidade! Altere antes de guardar.")
             st.stop()
         
         # Regra de Data de Finalização
@@ -342,7 +347,7 @@ if verificar_senha():
             st.success("✅ O Robô atualizou o Google Sheets com sucesso!")
             st.rerun()
         except Exception as e:
-            st.error(f"❌ Erro ao salvar: {e}")
+            st.error(f"❌ Erro ao guardar: {e}")
 
     # --- GRÁFICOS ---
     st.divider()
