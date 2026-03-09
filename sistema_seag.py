@@ -169,7 +169,7 @@ def criar_dados_iniciais():
         'Diligencia': ['Não'] * qtd,
         'Encaminhado ao CTA': ['Não'] * qtd,
         'Enviado a Consigfácil': ['Não'] * qtd,
-        'Data Limite': ['29/03/2026'] * qtd, # <-- Alterado aqui
+        'Data Limite': ['29/03/2026'] * qtd, 
         'Data de Finalização': [''] * qtd,
         'Observação': [''] * qtd,
         'Contato': [''] * qtd
@@ -204,7 +204,7 @@ if verificar_senha():
                 nova_linha = pd.DataFrame([{
                     'ID': novo_id, 'N° SIGED': '', 'Entidade': 'SEGURADORA E PREVIDÊNCIA - SULAMÉRICA SEGUROS DE PESSOAS E PREVIDÊNCIA',
                     'CNPJ': '01.704.513/0001-46', 'Status': 'Aguardando Doc', 'Parecer': '', 'Diligencia': 'Não',
-                    'Encaminhado ao CTA': 'Não', 'Enviado a Consigfácil': 'Não', 'Data Limite': '29/03/2026', # <-- Alterado aqui
+                    'Encaminhado ao CTA': 'Não', 'Enviado a Consigfácil': 'Não', 'Data Limite': '29/03/2026', 
                     'Data de Finalização': '', 'Observação': '', 'Contato': ''
                 }])
                 df = pd.concat([df, nova_linha], ignore_index=True)
@@ -288,11 +288,15 @@ if verificar_senha():
         return pdf.output(dest='S').encode('latin-1')
 
     st.sidebar.header("📁 Central de Relatórios")
+    
+    # --- NOVO: OPÇÃO CONSIGFÁCIL ADICIONADA AQUI ---
     opcoes = [
         ("Pendentes", "Status", "Aguardando Doc"),
         ("Finalizadas", "Status", "Finalizada"),
-        ("No CTA", "Encaminhado ao CTA", "Sim")
+        ("No CTA", "Encaminhado ao CTA", "Sim"),
+        ("Consigfácil", "Enviado a Consigfácil", "Sim") 
     ]
+    
     for nome, col, val in opcoes:
         if st.sidebar.button(f"📄 PDF: {nome}"):
             pdf_out = gerar_pdf_custom(df, col, val, f"Entidades {nome}")
@@ -354,4 +358,3 @@ if verificar_senha():
     col1, col2 = st.columns(2)
     with col1: st.plotly_chart(px.pie(df, names='Status', title='Progresso de Recadastramento', hole=0.3), use_container_width=True)
     with col2: st.plotly_chart(px.bar(df['Status'].value_counts(), title='Total por Status'), use_container_width=True)
-
