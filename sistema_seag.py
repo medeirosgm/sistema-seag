@@ -321,10 +321,15 @@ if verificar_senha():
         }
     )
 
-    if st.button("💾 Salvar Alterações na Nuvem"):
+if st.button("💾 Salvar Alterações na Nuvem"):
         df_verificacao = df.copy()
+        
+        # --- SOLUÇÃO DO VALUE ERROR ---
         for idx, row in df_editado.iterrows():
-            df_verificacao.loc[df_verificacao['ID'] == row['ID']] = row
+            mascara = df_verificacao['ID'] == row['ID']
+            for coluna in df_editado.columns:
+                df_verificacao.loc[mascara, coluna] = row[coluna]
+        # ------------------------------
             
         # --- TRAVA ANTI-DUPLICAÇÃO DE PARECER E DILIGÊNCIA ---
         pareceres_ativos = df_verificacao['Parecer'].replace('', pd.NA).dropna()
@@ -358,3 +363,4 @@ if verificar_senha():
     col1, col2 = st.columns(2)
     with col1: st.plotly_chart(px.pie(df, names='Status', title='Progresso de Recadastramento', hole=0.3), use_container_width=True)
     with col2: st.plotly_chart(px.bar(df['Status'].value_counts(), title='Total por Status'), use_container_width=True)
+
