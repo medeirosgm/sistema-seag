@@ -3,13 +3,16 @@ from streamlit_gsheets import GSheetsConnection
 import pandas as pd
 import plotly.express as px
 from fpdf import FPDF
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 # Configuração da Página SEAG
 st.set_page_config(page_title="Gestão SEAG 2026", layout="wide")
 
 # URL DIRETA DA PLANILHA
 URL_PLANILHA = "https://docs.google.com/spreadsheets/d/12nBlopOzq1LY1CDObfaNfWPU0xxa9-P-_e1IJtDgLB4/edit?gid=0#gid=0"
+
+# --- FUSO HORÁRIO DE MANAUS (UTC-4) ---
+FUSO_MANAUS = timezone(timedelta(hours=-4))
 
 # --- SISTEMA DE LOGIN ---
 def verificar_senha():
@@ -236,7 +239,7 @@ if verificar_senha():
     opcoes_tabela_parecer = [""] + numeros_totais
     opcoes_tabela_diligencia = ["Não", "Sim"] + numeros_totais
 
-    # --- GERADOR DE NUMERAÇÃO ÚNICA (O QUE SÓ MOSTRA NÚMEROS LIVRES) ---
+    # --- GERADOR DE NUMERAÇÃO ÚNICA ---
     st.write("### 🔢 Gerador de Numeração Única")
     with st.expander("Clique aqui para puxar um número livre de Parecer ou Diligência", expanded=False):
         c1, c2, c3, c4 = st.columns([3, 2, 2, 2])
@@ -269,11 +272,17 @@ if verificar_senha():
         pdf.set_font("Arial", 'B', 14)
         pdf.cell(190, 10, f"SEAG - {titulo_relatorio}", ln=True, align='C')
         pdf.set_font("Arial", 'I', 8)
-        pdf.cell(190, 7, f"Gerado em: {datetime.now().strftime('%d/%m/%Y %H:%M')}", ln=True, align='R')
+        
+        # HORÁRIO EXATO DE MANAUS AQUI NO PDF
+        data_hora_atual = datetime.now(FUSO_MANAUS).strftime('%d/%m/%Y %H:%M')
+        pdf.cell(190, 7, f"Gerado em: {data_hora_atual}", ln=True, align='R')
         pdf.ln(5)
         
         if filtro_coluna == 'Status':
             dados_f = dataframe[dataframe[filtro_coluna].astype(str).str.strip() == filtro_valor]
+        elif filtro_coluna == 'Diligencia':
+            # Pega todas as linhas onde Diligência NÃO é vazia e NÃO é "Não"
+            dados_f = dataframe[~dataframe[filtro_coluna].astype(str).str.strip().isin(['', 'Não'])]
         else:
             dados_f = dataframe[(dataframe[filtro_coluna].astype(str).str.upper() == 'SIM')]
 
@@ -299,7 +308,8 @@ if verificar_senha():
         ("Pendentes", "Status", "Aguardando Doc"),
         ("Parecer SEAG", "Status", "Doc. Recebido"),
         ("No CTA", "Encaminhado ao CTA", "Sim"),
-        ("Consigfácil", "Enviado a Consigfácil", "Sim") 
+        ("Consigfácil", "Enviado a Consigfácil", "Sim"),
+        ("Diligências", "Diligencia", "Ativas") # <-- O NOVO BOTÃO AQUI
     ]
     
     for nome, col, val in opcoes:
@@ -329,12 +339,10 @@ if verificar_senha():
     if st.button("💾 Salvar Alterações na Nuvem"):
         df_verificacao = df.copy()
         
-        # --- SOLUÇÃO DO VALUE ERROR ---
         for idx, row in df_editado.iterrows():
             mascara = df_verificacao['ID'] == row['ID']
             for coluna in df_editado.columns:
                 df_verificacao.loc[mascara, coluna] = row[coluna]
-        # ------------------------------
             
         # --- TRAVA ANTI-DUPLICAÇÃO DE PARECER E DILIGÊNCIA ---
         pareceres_ativos = df_verificacao['Parecer'].replace('', pd.NA).dropna()
@@ -349,10 +357,10 @@ if verificar_senha():
             st.error(f"❌ Erro de Numeração: A Diligência número {', '.join(dups)} já foi utilizada em outra entidade! Altere antes de salvar.")
             st.stop()
         
-        # Regra de Data de Recebimento
+        # Regra de Data de Recebimento (CRAVADA NO HORÁRIO DE MANAUS)
         for i, r in df_verificacao.iterrows():
             if str(r['Status']).strip() == 'Doc. Recebido' and not str(r['Data de Recebimento Doc.']).strip():
-                df_verificacao.at[i, 'Data de Recebimento Doc.'] = datetime.now().strftime('%d/%m/%Y')
+                df_verificacao.at[i, 'Data de Recebimento Doc.'] = datetime.now(FUSO_MANAUS).strftime('%d/%m/%Y')
             elif str(r['Status']).strip() == 'Aguardando Doc':
                 df_verificacao.at[i, 'Data de Recebimento Doc.'] = ''
 
