@@ -273,7 +273,6 @@ if verificar_senha():
         pdf.cell(190, 10, f"SEAG - {titulo_relatorio}", ln=True, align='C')
         pdf.set_font("Arial", 'I', 8)
         
-        # HORÁRIO EXATO DE MANAUS AQUI NO PDF
         data_hora_atual = datetime.now(FUSO_MANAUS).strftime('%d/%m/%Y %H:%M')
         pdf.cell(190, 7, f"Gerado em: {data_hora_atual}", ln=True, align='R')
         pdf.ln(5)
@@ -281,8 +280,11 @@ if verificar_senha():
         if filtro_coluna == 'Status':
             dados_f = dataframe[dataframe[filtro_coluna].astype(str).str.strip() == filtro_valor]
         elif filtro_coluna == 'Diligencia':
-            # Pega todas as linhas onde Diligência NÃO é vazia e NÃO é "Não"
-            dados_f = dataframe[~dataframe[filtro_coluna].astype(str).str.strip().isin(['', 'Não'])]
+            # --- NOVA REGRA AQUI: Tira quem não tem diligência E tira quem já foi pro CTA ---
+            mask_diligencia_ativa = ~dataframe[filtro_coluna].astype(str).str.strip().isin(['', 'Não'])
+            mask_nao_no_cta = dataframe['Encaminhado ao CTA'].astype(str).str.strip().str.upper() != 'SIM'
+            dados_f = dataframe[mask_diligencia_ativa & mask_nao_no_cta]
+            # --------------------------------------------------------------------------------
         else:
             dados_f = dataframe[(dataframe[filtro_coluna].astype(str).str.upper() == 'SIM')]
 
@@ -309,7 +311,7 @@ if verificar_senha():
         ("Parecer SEAG", "Status", "Doc. Recebido"),
         ("No CTA", "Encaminhado ao CTA", "Sim"),
         ("Consigfácil", "Enviado a Consigfácil", "Sim"),
-        ("Diligências", "Diligencia", "Ativas") # <-- O NOVO BOTÃO AQUI
+        ("Diligências", "Diligencia", "Ativas") 
     ]
     
     for nome, col, val in opcoes:
@@ -357,7 +359,7 @@ if verificar_senha():
             st.error(f"❌ Erro de Numeração: A Diligência número {', '.join(dups)} já foi utilizada em outra entidade! Altere antes de salvar.")
             st.stop()
         
-        # Regra de Data de Recebimento (CRAVADA NO HORÁRIO DE MANAUS)
+        # Regra de Data de Recebimento
         for i, r in df_verificacao.iterrows():
             if str(r['Status']).strip() == 'Doc. Recebido' and not str(r['Data de Recebimento Doc.']).strip():
                 df_verificacao.at[i, 'Data de Recebimento Doc.'] = datetime.now(FUSO_MANAUS).strftime('%d/%m/%Y')
@@ -376,4 +378,3 @@ if verificar_senha():
     col1, col2 = st.columns(2)
     with col1: st.plotly_chart(px.pie(df, names='Status', title='Progresso de Recadastramento', hole=0.3), use_container_width=True)
     with col2: st.plotly_chart(px.bar(df['Status'].value_counts(), title='Total por Status'), use_container_width=True)
-
