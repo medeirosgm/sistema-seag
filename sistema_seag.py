@@ -279,12 +279,20 @@ if verificar_senha():
         
         if filtro_coluna == 'Status':
             dados_f = dataframe[dataframe[filtro_coluna].astype(str).str.strip() == filtro_valor]
+            
         elif filtro_coluna == 'Diligencia':
-            # --- NOVA REGRA AQUI: Tira quem não tem diligência E tira quem já foi pro CTA ---
+            # Tira quem não tem diligência E tira quem já foi pro CTA
             mask_diligencia_ativa = ~dataframe[filtro_coluna].astype(str).str.strip().isin(['', 'Não'])
             mask_nao_no_cta = dataframe['Encaminhado ao CTA'].astype(str).str.strip().str.upper() != 'SIM'
             dados_f = dataframe[mask_diligencia_ativa & mask_nao_no_cta]
-            # --------------------------------------------------------------------------------
+            
+        elif filtro_coluna == 'Encaminhado ao CTA':
+            # --- NOVA REGRA AQUI: Só aparece se estiver no CTA e NÃO estiver na Consigfácil ---
+            mask_no_cta = dataframe['Encaminhado ao CTA'].astype(str).str.strip().str.upper() == 'SIM'
+            mask_nao_na_consigfacil = dataframe['Enviado a Consigfácil'].astype(str).str.strip().str.upper() != 'SIM'
+            dados_f = dataframe[mask_no_cta & mask_nao_na_consigfacil]
+            # ----------------------------------------------------------------------------------
+            
         else:
             dados_f = dataframe[(dataframe[filtro_coluna].astype(str).str.upper() == 'SIM')]
 
@@ -378,3 +386,4 @@ if verificar_senha():
     col1, col2 = st.columns(2)
     with col1: st.plotly_chart(px.pie(df, names='Status', title='Progresso de Recadastramento', hole=0.3), use_container_width=True)
     with col2: st.plotly_chart(px.bar(df['Status'].value_counts(), title='Total por Status'), use_container_width=True)
+
