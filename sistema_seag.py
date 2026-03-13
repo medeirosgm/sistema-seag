@@ -275,26 +275,25 @@ if verificar_senha():
         
         data_hora_atual = datetime.now(FUSO_MANAUS).strftime('%d/%m/%Y %H:%M')
         pdf.cell(190, 7, f"Gerado em: {data_hora_atual}", ln=True, align='R')
-        pdf.ln(5)
         
+        # --- FILTRAGEM DOS DADOS ---
         if filtro_coluna == 'Status':
             dados_f = dataframe[dataframe[filtro_coluna].astype(str).str.strip() == filtro_valor]
-            
         elif filtro_coluna == 'Diligencia':
-            # Tira quem não tem diligência E tira quem já foi pro CTA
             mask_diligencia_ativa = ~dataframe[filtro_coluna].astype(str).str.strip().isin(['', 'Não'])
             mask_nao_no_cta = dataframe['Encaminhado ao CTA'].astype(str).str.strip().str.upper() != 'SIM'
             dados_f = dataframe[mask_diligencia_ativa & mask_nao_no_cta]
-            
         elif filtro_coluna == 'Encaminhado ao CTA':
-            # --- NOVA REGRA AQUI: Só aparece se estiver no CTA e NÃO estiver na Consigfácil ---
             mask_no_cta = dataframe['Encaminhado ao CTA'].astype(str).str.strip().str.upper() == 'SIM'
             mask_nao_na_consigfacil = dataframe['Enviado a Consigfácil'].astype(str).str.strip().str.upper() != 'SIM'
             dados_f = dataframe[mask_no_cta & mask_nao_na_consigfacil]
-            # ----------------------------------------------------------------------------------
-            
         else:
             dados_f = dataframe[(dataframe[filtro_coluna].astype(str).str.upper() == 'SIM')]
+
+        # --- EXIBE TOTAL DE ENTIDADES NO TOPO DO PDF ---
+        pdf.set_font("Arial", 'B', 10)
+        pdf.cell(190, 7, f"Total de Entidades neste relatório: {len(dados_f)}", ln=True, align='L')
+        pdf.ln(3)
 
         pdf.set_font("Arial", 'B', 9)
         pdf.set_fill_color(220, 220, 220)
@@ -316,16 +315,36 @@ if verificar_senha():
     
     opcoes = [
         ("Pendentes", "Status", "Aguardando Doc"),
-        ("Parecer SEAG", "Status", "Doc. Recebido"),
+        ("Docs Recebidos", "Status", "Doc. Recebido"),
         ("No CTA", "Encaminhado ao CTA", "Sim"),
         ("Consigfácil", "Enviado a Consigfácil", "Sim"),
         ("Diligências", "Diligencia", "Ativas") 
     ]
     
+    # --- DASHBOARD LATERAL (CONTAGEM AO VIVO) ---
     for nome, col, val in opcoes:
-        if st.sidebar.button(f"📄 PDF: {nome}"):
+        # Puxa as mesmas regras do PDF para mostrar o número exato na tela
+        if col == 'Status':
+            count = len(df[df[col].astype(str).str.strip() == val])
+        elif col == 'Diligencia':
+            m1 = ~df[col].astype(str).str.strip().isin(['', 'Não'])
+            m2 = df['Encaminhado ao CTA'].astype(str).str.strip().str.upper() != 'SIM'
+            count = len(df[m1 & m2])
+        elif col == 'Encaminhado ao CTA':
+            m1 = df['Encaminhado ao CTA'].astype(str).str.strip().str.upper() == 'SIM'
+            m2 = df['Enviado a Consigfácil'].astype(str).str.strip().str.upper() != 'SIM'
+            count = len(df[m1 & m2])
+        else:
+            count = len(df[(df[col].astype(str).str.upper() == 'SIM')])
+
+        # Exibe o número em negrito direto na barra!
+        st.sidebar.markdown(f"**{nome}:** `{count}` entidades")
+        
+        # Botão de Gerar e Baixar PDF
+        if st.sidebar.button(f"📄 PDF: {nome}", key=f"btn_{nome}"):
             pdf_out = gerar_pdf_custom(df, col, val, f"Entidades {nome}")
-            st.sidebar.download_button(f"⬇️ Baixar {nome}", pdf_out, f"SEAG_{nome}.pdf")
+            st.sidebar.download_button(f"⬇️ Baixar {nome}", pdf_out, f"SEAG_{nome}.pdf", key=f"dl_{nome}")
+        st.sidebar.divider()
 
     # --- PAINEL DE EDIÇÃO (COM CRUD ATIVADO) ---
     st.write("### 📝 Painel de Controle Online")
