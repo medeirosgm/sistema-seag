@@ -159,7 +159,8 @@ def criar_dados_iniciais():
         ("SINDICATO - SINTRAQUA", "05.333.666/0001-51"),
         ("SINDICATO - SISPEAM", "03.355.321/0001-35"),
         ("VEMCARD PARTICIPACOES S.A", "44.133.733/0001-03"),
-        ("SEGURADORA E PREVIDÊNCIA - SULAMÉRICA SEGUROS DE PESSOAS E PREVIDÊNCIA", "01.704.513/0001-46")
+        ("SEGURADORA E PREVIDÊNCIA - SULAMÉRICA SEGUROS DE PESSOAS E PREVIDÊNCIA", "01.704.513/0001-46"),
+        ("ASSIST. ODONTO E MEDICA - JPT SERVICOS ODONTOLÓGICOS LTDA", "05.578.043/0001-72")
     ]
     qtd = len(dados_consignatarias)
     return pd.DataFrame({
@@ -210,11 +211,24 @@ if verificar_senha():
                 df['Contato'] = ''
                 atualizou_planilha = True
                 
+            # INJEÇÃO SULAMÉRICA
             if not df['CNPJ'].astype(str).str.contains('01.704.513/0001-46').any():
                 novo_id = int(df['ID'].max()) + 1 if pd.notna(df['ID'].max()) else len(df) + 1
                 nova_linha = pd.DataFrame([{
                     'ID': novo_id, 'N° SIGED': '', 'Entidade': 'SEGURADORA E PREVIDÊNCIA - SULAMÉRICA SEGUROS DE PESSOAS E PREVIDÊNCIA',
                     'CNPJ': '01.704.513/0001-46', 'Status': 'Aguardando Doc', 'Parecer': '', 'Diligencia': 'Não',
+                    'Encaminhado ao CTA': 'Não', 'Enviado a Consigfácil': 'Não', 'Data Limite': '29/03/2026', 
+                    'Data de Recebimento Doc.': '', 'Observação': '', 'Contato': ''
+                }])
+                df = pd.concat([df, nova_linha], ignore_index=True)
+                atualizou_planilha = True
+
+            # INJEÇÃO JPT SERVICOS ODONTOLOGICOS
+            if not df['CNPJ'].astype(str).str.contains('05.578.043/0001-72').any():
+                novo_id = int(df['ID'].max()) + 1 if pd.notna(df['ID'].max()) else len(df) + 1
+                nova_linha = pd.DataFrame([{
+                    'ID': novo_id, 'N° SIGED': '', 'Entidade': 'ASSIST. ODONTO E MEDICA - JPT SERVICOS ODONTOLÓGICOS LTDA',
+                    'CNPJ': '05.578.043/0001-72', 'Status': 'Aguardando Doc', 'Parecer': '', 'Diligencia': 'Não',
                     'Encaminhado ao CTA': 'Não', 'Enviado a Consigfácil': 'Não', 'Data Limite': '29/03/2026', 
                     'Data de Recebimento Doc.': '', 'Observação': '', 'Contato': ''
                 }])
@@ -323,7 +337,6 @@ if verificar_senha():
     
     # --- DASHBOARD LATERAL (CONTAGEM AO VIVO) ---
     for nome, col, val in opcoes:
-        # Puxa as mesmas regras do PDF para mostrar o número exato na tela
         if col == 'Status':
             count = len(df[df[col].astype(str).str.strip() == val])
         elif col == 'Diligencia':
@@ -337,10 +350,8 @@ if verificar_senha():
         else:
             count = len(df[(df[col].astype(str).str.upper() == 'SIM')])
 
-        # Exibe o número em negrito direto na barra!
         st.sidebar.markdown(f"**{nome}:** `{count}` entidades")
         
-        # Botão de Gerar e Baixar PDF
         if st.sidebar.button(f"📄 PDF: {nome}", key=f"btn_{nome}"):
             pdf_out = gerar_pdf_custom(df, col, val, f"Entidades {nome}")
             st.sidebar.download_button(f"⬇️ Baixar {nome}", pdf_out, f"SEAG_{nome}.pdf", key=f"dl_{nome}")
