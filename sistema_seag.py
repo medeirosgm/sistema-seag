@@ -198,6 +198,12 @@ if verificar_senha():
         else:
             atualizou_planilha = False
             
+            # --- EXCLUSÃO AUTOMÁTICA DO ID 106 (DUPLICIDADE) ---
+            if (df['ID'].astype(str) == '106').any():
+                df = df[df['ID'].astype(str) != '106']
+                atualizou_planilha = True
+            # ---------------------------------------------------
+            
             # --- MIGRAÇÃO AUTOMÁTICA DE NOMES ANTIGOS ---
             if 'Data de Finalização' in df.columns:
                 df = df.rename(columns={'Data de Finalização': 'Data de Recebimento Doc.'})
@@ -254,7 +260,7 @@ if verificar_senha():
                 
             if atualizou_planilha:
                 conn.update(data=df)
-                st.info("✅ O sistema migrou e atualizou automaticamente os dados na nuvem!")
+                st.info("✅ O sistema excluiu a duplicidade e atualizou os dados na nuvem!")
 
         df = df.fillna('')
     except Exception as e:
