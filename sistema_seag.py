@@ -160,7 +160,8 @@ def criar_dados_iniciais():
         ("SINDICATO - SISPEAM", "03.355.321/0001-35"),
         ("VEMCARD PARTICIPACOES S.A", "44.133.733/0001-03"),
         ("SEGURADORA E PREVIDÊNCIA - SULAMÉRICA SEGUROS DE PESSOAS E PREVIDÊNCIA", "01.704.513/0001-46"),
-        ("ASSIST. ODONTO E MEDICA - JPT SERVICOS ODONTOLÓGICOS LTDA", "05.578.043/0001-72")
+        ("ASSIST. ODONTO E MEDICA - JPT SERVICOS ODONTOLÓGICOS LTDA", "05.578.043/0001-72"),
+        ("ASSIST. ODONTO E MEDICA - SEMPRE ODONTO", "04.222.235/0001-89")
     ]
     qtd = len(dados_consignatarias)
     return pd.DataFrame({
@@ -229,6 +230,18 @@ if verificar_senha():
                 nova_linha = pd.DataFrame([{
                     'ID': novo_id, 'N° SIGED': '', 'Entidade': 'ASSIST. ODONTO E MEDICA - JPT SERVICOS ODONTOLÓGICOS LTDA',
                     'CNPJ': '05.578.043/0001-72', 'Status': 'Aguardando Doc', 'Parecer': '', 'Diligencia': 'Não',
+                    'Encaminhado ao CTA': 'Não', 'Enviado a Consigfácil': 'Não', 'Data Limite': '29/03/2026', 
+                    'Data de Recebimento Doc.': '', 'Observação': '', 'Contato': ''
+                }])
+                df = pd.concat([df, nova_linha], ignore_index=True)
+                atualizou_planilha = True
+
+            # INJEÇÃO SEMPRE ODONTO
+            if not df['CNPJ'].astype(str).str.contains('04.222.235/0001-89').any():
+                novo_id = int(df['ID'].max()) + 1 if pd.notna(df['ID'].max()) else len(df) + 1
+                nova_linha = pd.DataFrame([{
+                    'ID': novo_id, 'N° SIGED': '', 'Entidade': 'ASSIST. ODONTO E MEDICA - SEMPRE ODONTO',
+                    'CNPJ': '04.222.235/0001-89', 'Status': 'Aguardando Doc', 'Parecer': '', 'Diligencia': 'Não',
                     'Encaminhado ao CTA': 'Não', 'Enviado a Consigfácil': 'Não', 'Data Limite': '29/03/2026', 
                     'Data de Recebimento Doc.': '', 'Observação': '', 'Contato': ''
                 }])
@@ -416,4 +429,3 @@ if verificar_senha():
     col1, col2 = st.columns(2)
     with col1: st.plotly_chart(px.pie(df, names='Status', title='Progresso de Recadastramento', hole=0.3), use_container_width=True)
     with col2: st.plotly_chart(px.bar(df['Status'].value_counts(), title='Total por Status'), use_container_width=True)
-
