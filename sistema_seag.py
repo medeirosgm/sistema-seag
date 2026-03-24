@@ -36,25 +36,28 @@ def verificar_senha():
 def criar_dados_iniciais():
     dados_consignatarias = [
         ("ASSIST. ODONTO E MEDICA - DENTALSAUDE", "08.775.214/0001-13"),
+        ("ASSIST. ODONTO E MEDICA - JPT SERVICOS ODONTOLÓGICOS LTDA", "05.578.043/0001-72"),
         ("ASSIST. ODONTO E MÉDICA - ODONTO MAIS BRASIL", "10.770.439/0001-52"),
-        ("OPERADORA DE PLANOS ODONTOLOGICOS LTDA", "04.747.029/0001-34"),
         ("ASSIST. ODONTO E MEDICA - ODONTOCLINIK", "05.207.503/0001-08"),
         ("ASSIST. ODONTO E MEDICA - ODONTOMED", "05.205.811/0001-80"),
         ("ASSIST. ODONTO E MEDICA - PLANODONT", "05.355.851/0001-88"),
+        ("ASSIST. ODONTO E MEDICA - SEMPRE ODONTO", "04.222.235/0001-89"),
         ("ASSIST. ODONTO E MEDICA - SERVDONTO PLANO", "05.194.375/0001-50"),
-        ("ASSIST. ODONTOLOGICA LTDA", "02.007.821/0001-81"),
         ("ASSIST. ODONTO E MEDICA - SUL AMERICA SAUDE", "33.259.514/0001-05"),
         ("ASSIST. ODONTO E MEDICA - UBEASP", "04.112.431/0001-17"),
         ("ASSIST. ODONTO E MEDICA - UNIBRAS", "23.501.076/0001-20"),
         ("ASSIST. ODONTO E MÉDICA - UNIMED FEDERATIVA", "05.533.006/0001-10"),
         ("ASSIST. ODONTO E MEDICA - UNIODONTO", "02.259.313/0001-53"),
         ("ASSIST. ODONTO E MEDICA - USODONTO", "05.353.936/0001-20"),
+        ("ASSIST. ODONTOLOGICA LTDA", "02.007.821/0001-81"),
         ("ASSIST.ODONTO E MÉDICA - PREVIDENT ASSIST", "04.810.828/0001-00"),
         ("ASSOCIAÇÃO - A.S.R.U.E.B.", "03.818.513/0001-83"),
         ("ASSOCIAÇÃO - ADVAM", "34.503.639/0001-30"),
+        ("ASSOCIAÇÃO - AFFEAM", "04.503.249/0001-70"),
         ("ASSOCIAÇÃO - AGREMIACAO RECREATIVA DOS PROF DE URUCURITUBA - AGREPU", "03.583.555/0001-44"),
         ("ASSOCIAÇÃO - AGSPME", "04.512.355/0001-90"),
         ("ASSOCIAÇÃO - APBMAM", "04.839.860/0001-53"),
+        ("ASSOCIAÇÃO - APPBMAM (PRACAS PM/BM)", "04.839.860/0001-53"),
         ("ASSOCIAÇÃO - ASA", "01.319.429/0001-02"),
         ("ASSOCIAÇÃO - ASFHAJ", "05.789.231/0001-33"),
         ("ASSOCIAÇÃO - ASPA", "04.441.953/0001-05"),
@@ -65,16 +68,12 @@ def criar_dados_iniciais():
         ("ASSOCIAÇÃO - CASPEB", "04.523.771/0001-81"),
         ("ASSOCIAÇÃO - CREPI", "02.541.656/0001-52"),
         ("ASSOCIAÇÃO - CREPROM", "18.124.723/0001-14"),
-        ("ASSOCIAÇÃO - APPBMAM (PRACAS PM/BM)", "04.839.860/0001-53"),
         ("ASSOCIAÇÃO - DE DELEGADOS DE POLICIA - AM", "14.312.754/0001-26"),
         ("ASSOCIAÇÃO - DEF PUBLICOS", "04.513.689/0001-23"),
         ("ASSOCIAÇÃO - DOS OFICIAIS PM/BM - AM", "04.533.741/0001-90"),
         ("ASSOCIAÇÃO - DOS PERITOS OFICIAIS - AM", "02.541.656/0001-52"),
         ("ASSOCIAÇÃO - DOS PRACAS DO ESTADO DO AM", "18.124.723/0001-14"),
         ("ASSOCIAÇÃO - DOS PROCURADORES DO AMAZONAS", "04.534.781/0001-41"),
-        ("ASSOCIAÇÃO - SERV. FUNDACAO HEMOAM", "84.528.854/0001-41"),
-        ("ASSOCIAÇÃO - SERVIDORES SECRETARIA SAUDE", "04.524.556/0001-04"),
-        ("ASSOCIAÇÃO - SERVIDORES UEA - ASSUEA", "18.454.329/0001-73"),
         ("ASSOCIAÇÃO - FAP", "02.000.000/0001-01"),
         ("ASSOCIAÇÃO - FAZENDARIO", "01.173.141/0001-72"),
         ("ASSOCIAÇÃO - FUNC. ALFREDO DA MATTA", "03.023.341/0001-34"),
@@ -82,6 +81,9 @@ def criar_dados_iniciais():
         ("ASSOCIAÇÃO - MILICRED", "05.333.666/0001-51"),
         ("ASSOCIAÇÃO - S.B.S. - SESAU", "22.757.567/0001-15"),
         ("ASSOCIAÇÃO - S.R.B. - SEDUC", "04.413.666/0001-25"),
+        ("ASSOCIAÇÃO - SERV. FUNDACAO HEMOAM", "84.528.854/0001-41"),
+        ("ASSOCIAÇÃO - SERVIDORES SECRETARIA SAUDE", "04.524.556/0001-04"),
+        ("ASSOCIAÇÃO - SERVIDORES UEA - ASSUEA", "18.454.329/0001-73"),
         ("ASSOCIAÇÃO - SUBTENENTES E SARGENTOS PM/BM", "04.532.556/0001-57"),
         ("BANCO - ABN REAL SANTANDER", "90.400.888/0001-42"),
         ("BANCO - BMG S.A", "61.186.688/0001-76"),
@@ -118,8 +120,8 @@ def criar_dados_iniciais():
         ("CARTAO - NIO MEIOS DE PAGAMENTO S.A", "11.455.339/0001-40"),
         ("CARTAO - PROVER PROMOÇÃO DE VENDAS LTDA", "28.534.147/0001-00"),
         ("CLUBE - CLUBE MUNICIPAL", "04.509.387/0001-91"),
-        ("COOPERATIVA - SICREDI BIOMAS", "23.532.855/0001-33"),
         ("COOPERATIVA - SICOOB AMAZONIA", "02.253.955/0001-91"),
+        ("COOPERATIVA - SICREDI BIOMAS", "23.532.855/0001-33"),
         ("COOPERATIVA - SICREDI VALE", "23.533.155/0001-17"),
         ("FINANCEIRA - EAGLE SCD S.A.", "45.414.373/0001-11"),
         ("FINANCEIRA - EMPRESTEI CARD S.A", "33.422.551/0001-43"),
@@ -129,6 +131,7 @@ def criar_dados_iniciais():
         ("FINANCEIRA - VALOR SCD S.A", "41.733.277/0001-75"),
         ("HABITAÇÃO - SUHAB", "04.355.353/0001-32"),
         ("INSTITUTO BENEFICENTE CANDIDO MARIANO", "04.715.355/0001-40"),
+        ("OPERADORA DE PLANOS ODONTOLOGICOS LTDA", "04.747.029/0001-34"),
         ("OUTROS - FUNDACAO CBMAM", "12.564.383/0001-07"),
         ("PREVIDÊNCIA - BRADESCO", "33.000.000/0001-37"),
         ("SEGURADORA E PREVIDÊNCIA - AFFEAM SEGUROS", "04.533.243/0001-70"),
@@ -142,27 +145,29 @@ def criar_dados_iniciais():
         ("SEGURADORA E PREVIDÊNCIA - RSPREV", "26.421.353/0001-32"),
         ("SEGURADORA E PREVIDÊNCIA - SABEMI", "33.127.323/0001-05"),
         ("SEGURADORA E PREVIDÊNCIA - SABEMI SEGURADORA", "33.123.224/0001-38"),
-        ("SINDICATO - SINDOCENTES UEA", "18.333.774/0001-03"),
-        ("SINDICATO - SINDEPOL", "14.312.754/0001-26"),
-        ("SINDICATO - SINDEIPOL", "23.334.323/0001-29"),
+        ("SEGURADORA E PREVIDÊNCIA - SULAMÉRICA SEGUROS DE PESSOAS E PREVIDÊNCIA", "01.704.513/0001-46"),
         ("SINDICATO - DOS FISIOTERAPEUTAS", "44.223.733/0001-90"),
-        ("SINDICATO - SIMEAM", "04.523.689/0001-23"),
-        ("SINDICATO - SINTAFISCO", "04.331.711/0001-55"),
         ("SINDICATO - SIFAM", "01.555.421/0001-11"),
-        ("SINDICATO - SINTRASPA AM", "04.509.378/0001-43"),
+        ("SINDICATO - SIMEAM", "04.523.689/0001-23"),
         ("SINDICATO - SINDAGENTE", "18.502.524/0001-15"),
+        ("SINDICATO - SINDEIPOL", "23.334.323/0001-29"),
+        ("SINDICATO - SINDEPOL", "14.312.754/0001-26"),
         ("SINDICATO - SINDIFISCO", "34.555.313/0001-32"),
+        ("SINDICATO - SINDOCENTES UEA", "18.333.774/0001-03"),
         ("SINDICATO - SINDSAUDE", "34.333.667/0001-13"),
         ("SINDICATO - SINPOL", "34.503.376/0001-30"),
         ("SINDICATO - SINSPEAM", "00.000.000/0001-91"),
         ("SINDICATO - SINTEAM", "04.533.666/0001-41"),
+        ("SINDICATO - SINTAFISCO", "04.331.711/0001-55"),
         ("SINDICATO - SINTRAQUA", "05.333.666/0001-51"),
+        ("SINDICATO - SINTRASPA AM", "04.509.378/0001-43"),
         ("SINDICATO - SISPEAM", "03.355.321/0001-35"),
-        ("VEMCARD PARTICIPACOES S.A", "44.133.733/0001-03"),
-        ("SEGURADORA E PREVIDÊNCIA - SULAMÉRICA SEGUROS DE PESSOAS E PREVIDÊNCIA", "01.704.513/0001-46"),
-        ("ASSIST. ODONTO E MEDICA - JPT SERVICOS ODONTOLÓGICOS LTDA", "05.578.043/0001-72"),
-        ("ASSIST. ODONTO E MEDICA - SEMPRE ODONTO", "04.222.235/0001-89")
+        ("VEMCARD PARTICIPACOES S.A", "44.133.733/0001-03")
     ]
+    
+    # Garantia de ordem alfabética já na base inicial
+    dados_consignatarias.sort(key=lambda x: x[0])
+    
     qtd = len(dados_consignatarias)
     return pd.DataFrame({
         'ID': range(1, qtd + 1),
@@ -194,7 +199,7 @@ if verificar_senha():
         if df.empty or len(df.columns) < 2:
             df = criar_dados_iniciais()
             conn.update(data=df)
-            st.info("Planilha inicializada automaticamente com as entidades!")
+            st.info("Planilha inicializada automaticamente com as entidades em ordem alfabética!")
         else:
             atualizou_planilha = False
             
@@ -220,9 +225,8 @@ if verificar_senha():
                 
             # INJEÇÃO SULAMÉRICA
             if not df['CNPJ'].astype(str).str.contains('01.704.513/0001-46').any():
-                novo_id = int(df['ID'].max()) + 1 if pd.notna(df['ID'].max()) else len(df) + 1
                 nova_linha = pd.DataFrame([{
-                    'ID': novo_id, 'N° SIGED': '', 'Entidade': 'SEGURADORA E PREVIDÊNCIA - SULAMÉRICA SEGUROS DE PESSOAS E PREVIDÊNCIA',
+                    'ID': 999, 'N° SIGED': '', 'Entidade': 'SEGURADORA E PREVIDÊNCIA - SULAMÉRICA SEGUROS DE PESSOAS E PREVIDÊNCIA',
                     'CNPJ': '01.704.513/0001-46', 'Status': 'Aguardando Doc', 'Parecer': '', 'Diligencia': 'Não',
                     'Encaminhado ao CTA': 'Não', 'Enviado a Consigfácil': 'Não', 'Data Limite': '29/03/2026', 
                     'Data de Recebimento Doc.': '', 'Observação': '', 'Contato': ''
@@ -232,9 +236,8 @@ if verificar_senha():
 
             # INJEÇÃO JPT SERVICOS ODONTOLOGICOS
             if not df['CNPJ'].astype(str).str.contains('05.578.043/0001-72').any():
-                novo_id = int(df['ID'].max()) + 1 if pd.notna(df['ID'].max()) else len(df) + 1
                 nova_linha = pd.DataFrame([{
-                    'ID': novo_id, 'N° SIGED': '', 'Entidade': 'ASSIST. ODONTO E MEDICA - JPT SERVICOS ODONTOLÓGICOS LTDA',
+                    'ID': 999, 'N° SIGED': '', 'Entidade': 'ASSIST. ODONTO E MEDICA - JPT SERVICOS ODONTOLÓGICOS LTDA',
                     'CNPJ': '05.578.043/0001-72', 'Status': 'Aguardando Doc', 'Parecer': '', 'Diligencia': 'Não',
                     'Encaminhado ao CTA': 'Não', 'Enviado a Consigfácil': 'Não', 'Data Limite': '29/03/2026', 
                     'Data de Recebimento Doc.': '', 'Observação': '', 'Contato': ''
@@ -244,10 +247,20 @@ if verificar_senha():
 
             # INJEÇÃO SEMPRE ODONTO
             if not df['CNPJ'].astype(str).str.contains('04.222.235/0001-89').any():
-                novo_id = int(df['ID'].max()) + 1 if pd.notna(df['ID'].max()) else len(df) + 1
                 nova_linha = pd.DataFrame([{
-                    'ID': novo_id, 'N° SIGED': '', 'Entidade': 'ASSIST. ODONTO E MEDICA - SEMPRE ODONTO',
+                    'ID': 999, 'N° SIGED': '', 'Entidade': 'ASSIST. ODONTO E MEDICA - SEMPRE ODONTO',
                     'CNPJ': '04.222.235/0001-89', 'Status': 'Aguardando Doc', 'Parecer': '', 'Diligencia': 'Não',
+                    'Encaminhado ao CTA': 'Não', 'Enviado a Consigfácil': 'Não', 'Data Limite': '29/03/2026', 
+                    'Data de Recebimento Doc.': '', 'Observação': '', 'Contato': ''
+                }])
+                df = pd.concat([df, nova_linha], ignore_index=True)
+                atualizou_planilha = True
+
+            # INJEÇÃO ASSOCIAÇÃO - AFFEAM
+            if not df['CNPJ'].astype(str).str.contains('04.503.249/0001-70').any():
+                nova_linha = pd.DataFrame([{
+                    'ID': 999, 'N° SIGED': '', 'Entidade': 'ASSOCIAÇÃO - AFFEAM',
+                    'CNPJ': '04.503.249/0001-70', 'Status': 'Aguardando Doc', 'Parecer': '', 'Diligencia': 'Não',
                     'Encaminhado ao CTA': 'Não', 'Enviado a Consigfácil': 'Não', 'Data Limite': '29/03/2026', 
                     'Data de Recebimento Doc.': '', 'Observação': '', 'Contato': ''
                 }])
@@ -258,9 +271,19 @@ if verificar_senha():
                 df['Data Limite'] = '29/03/2026'
                 atualizou_planilha = True
                 
+            # --- MOTOR DE ORDENAÇÃO ALFABÉTICA ---
+            # Verifica se está fora de ordem e arruma tudo automaticamente
+            df_ordenado = df.sort_values(by='Entidade', ignore_index=True)
+            df_ordenado['ID'] = range(1, len(df_ordenado) + 1)
+            
+            if not df['Entidade'].equals(df_ordenado['Entidade']):
+                df = df_ordenado
+                atualizou_planilha = True
+            # -------------------------------------
+
             if atualizou_planilha:
                 conn.update(data=df)
-                st.info("✅ O sistema excluiu a duplicidade e atualizou os dados na nuvem!")
+                st.info("✅ Entidades inseridas e Planilha organizada em ordem alfabética com sucesso!")
 
         df = df.fillna('')
     except Exception as e:
