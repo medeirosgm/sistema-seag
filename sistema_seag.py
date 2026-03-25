@@ -1,3 +1,4 @@
+
 import streamlit as st
 from streamlit_gsheets import GSheetsConnection
 import pandas as pd
@@ -158,6 +159,7 @@ def criar_dados_iniciais():
         ("SINDICATO - SINPOL", "34.503.376/0001-30"),
         ("SINDICATO - SINSPEAM", "00.000.000/0001-91"),
         ("SINDICATO - SINTEAM", "04.533.666/0001-41"),
+        ("SINDICATO - SINTESAM", "63.656.433/0001-10"),
         ("SINDICATO - SINTAFISCO", "04.331.711/0001-55"),
         ("SINDICATO - SINTRAQUA", "05.333.666/0001-51"),
         ("SINDICATO - SINTRASPA AM", "04.509.378/0001-43"),
@@ -261,6 +263,17 @@ if verificar_senha():
                 nova_linha = pd.DataFrame([{
                     'ID': 999, 'N° SIGED': '', 'Entidade': 'ASSOCIAÇÃO - AFFEAM',
                     'CNPJ': '04.503.249/0001-70', 'Status': 'Aguardando Doc', 'Parecer': '', 'Diligencia': 'Não',
+                    'Encaminhado ao CTA': 'Não', 'Enviado a Consigfácil': 'Não', 'Data Limite': '29/03/2026', 
+                    'Data de Recebimento Doc.': '', 'Observação': '', 'Contato': ''
+                }])
+                df = pd.concat([df, nova_linha], ignore_index=True)
+                atualizou_planilha = True
+                
+            # INJEÇÃO SINDICATO - SINTESAM
+            if not df['CNPJ'].astype(str).str.contains('63.656.433/0001-10').any():
+                nova_linha = pd.DataFrame([{
+                    'ID': 999, 'N° SIGED': '', 'Entidade': 'SINDICATO - SINTESAM',
+                    'CNPJ': '63.656.433/0001-10', 'Status': 'Aguardando Doc', 'Parecer': '', 'Diligencia': 'Não',
                     'Encaminhado ao CTA': 'Não', 'Enviado a Consigfácil': 'Não', 'Data Limite': '29/03/2026', 
                     'Data de Recebimento Doc.': '', 'Observação': '', 'Contato': ''
                 }])
