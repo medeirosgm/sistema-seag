@@ -1,4 +1,3 @@
-
 import streamlit as st
 from streamlit_gsheets import GSheetsConnection
 import pandas as pd
@@ -443,13 +442,15 @@ if verificar_senha():
         pareceres_ativos = df_verificacao['Parecer'].replace('', pd.NA).dropna()
         if pareceres_ativos.duplicated().any():
             duplicados = pareceres_ativos[pareceres_ativos.duplicated()].unique()
-            st.error(f"❌ Erro de Numeração: O Parecer número {', '.join(duplicados)} já foi utilizado em outra entidade! Altere antes de salvar.")
+            duplicados_str = [str(d) for d in duplicados] # <- CORREÇÃO AQUI
+            st.error(f"❌ Erro de Numeração: O Parecer número {', '.join(duplicados_str)} já foi utilizado em outra entidade! Altere antes de salvar.")
             st.stop()
             
         diligencias_ativas = df_verificacao['Diligencia'].replace(['', 'Não', 'Sim'], pd.NA).dropna()
         if diligencias_ativas.duplicated().any():
             dups = diligencias_ativas[diligencias_ativas.duplicated()].unique()
-            st.error(f"❌ Erro de Numeração: A Diligência número {', '.join(dups)} já foi utilizada em outra entidade! Altere antes de salvar.")
+            dups_str = [str(d) for d in dups] # <- CORREÇÃO AQUI
+            st.error(f"❌ Erro de Numeração: A Diligência número {', '.join(dups_str)} já foi utilizada em outra entidade! Altere antes de salvar.")
             st.stop()
         
         # Regra de Data de Recebimento
